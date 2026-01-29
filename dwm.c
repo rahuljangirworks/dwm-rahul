@@ -314,6 +314,7 @@ static void updatetitle(Client *c);
 static void updatewindowtype(Client *c);
 static void updatewmhints(Client *c);
 static void view(const Arg *arg);
+static void shiftview(const Arg *arg);
 static pid_t winpid(Window w);
 static Client *wintoclient(Window w);
 static Monitor *wintomon(Window w);
@@ -4015,6 +4016,27 @@ zoom(const Arg *arg)
 	if (c == nexttiled(selmon->clients) && !(c = nexttiled(c->next)))
 		return;
 	pop(c);
+}
+
+void
+shiftview(const Arg *arg)
+{
+	Arg shifted;
+	unsigned int curtags = selmon->tagset[selmon->seltags];
+	int i;
+
+	if (arg->i > 0) { /* next tag */
+		for (i = 0; i < LENGTH(tags) && !(curtags & (1 << i)); i++);
+		shifted.ui = curtags << 1;
+		if (shifted.ui > (1 << (LENGTH(tags) - 1)))
+			shifted.ui = 1;
+	} else { /* prev tag */
+		for (i = 0; i < LENGTH(tags) && !(curtags & (1 << i)); i++);
+		shifted.ui = curtags >> 1;
+		if (shifted.ui == 0)
+			shifted.ui = 1 << (LENGTH(tags) - 1);
+	}
+	view(&shifted);
 }
 
 /* Monitor-specific tag management functions */
